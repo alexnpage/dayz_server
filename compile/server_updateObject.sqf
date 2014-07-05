@@ -19,12 +19,16 @@ _objectID =	_object getVariable ["ObjectID","0"];
 _uid = 		_object getVariable ["ObjectUID","0"];
 
 if ((typeName _objectID != "string") || (typeName _uid != "string")) then
-{ 
+{
     diag_log(format["Non-string Object: ID %1 UID %2", _objectID, _uid]);
     //force fail
     _objectID = "0";
     _uid = "0";
 };
+
+// Epoch Admin Tools
+if (_object getVariable "MalSar" == 1) exitWith {};
+
 if (!_parachuteWest && !(locked _object)) then {
 	if (_objectID == "0" && _uid == "0") then
 	{
@@ -91,7 +95,7 @@ _object_damage = {
 			if (_hit > 0) then {_array set [count _array,[_selection,_hit]]};
 			_object setHit ["_selection", _hit];
 		} count _hitpoints;
-	
+
 		_key = format["CHILD:306:%1:%2:%3:",_objectID,_array,_damage];
 		//diag_log ("HIVE: WRITE: "+ str(_key));
 		_key call server_hiveWrite;
@@ -111,7 +115,7 @@ _object_killed = {
 		_hit = 1;
 		_object setHit ["_selection", _hit];
 	} count _hitpoints;
-	
+
 	if (_objectID == "0") then {
 		_key = format["CHILD:306:%1:%2:%3:",_uid,_array,_damage];
 	} else {
@@ -146,7 +150,7 @@ _object_repair = {
 		if (_hit > 0) then {_array set [count _array,[_selection,_hit]]};
 		_object setHit ["_selection", _hit];
 	} count _hitpoints;
-	
+
 	_key = format["CHILD:306:%1:%2:%3:",_objectID,_array,_damage];
 	//diag_log ("HIVE: WRITE: "+ str(_key));
 	_key call server_hiveWrite;
