@@ -10,7 +10,7 @@ waitUntil{initialized}; //means all the functions are now defined
 diag_log "HIVE: Starting";
 
 waituntil{isNil "sm_done"}; // prevent server_monitor be called twice (bug during login of the first player)
-	
+
 // Custom Configs
 if(isnil "MaxVehicleLimit") then {
 	MaxVehicleLimit = 50;
@@ -35,7 +35,7 @@ if (isServer && isNil "sm_done") then {
 	for "_i" from 1 to 5 do {
 		diag_log "HIVE: trying to get objects";
 		_key = format["CHILD:302:%1:", dayZ_instance];
-		_hiveResponse = _key call server_hiveReadWrite;  
+		_hiveResponse = _key call server_hiveReadWrite;
 		if ((((isnil "_hiveResponse") || {(typeName _hiveResponse != "ARRAY")}) || {((typeName (_hiveResponse select 1)) != "SCALAR")})) then {
 			if ((_hiveResponse select 1) == "Instance already initialized") then {
 				_superkey = profileNamespace getVariable "SUPERKEY";
@@ -44,26 +44,26 @@ if (isServer && isNil "sm_done") then {
 				diag_log ("HIVE: attempt to kill.. HiveExt response:"+str(_res));
 			} else {
 				diag_log ("HIVE: connection problem... HiveExt response:"+str(_hiveResponse));
-			
+
 			};
 			_hiveResponse = ["",0];
-		} 
+		}
 		else {
 			diag_log ("HIVE: found "+str(_hiveResponse select 1)+" objects" );
 			_i = 99; // break
 		};
 	};
-	
+
 	_BuildingQueue = [];
 	_objectQueue = [];
-	
+
 	if ((_hiveResponse select 0) == "ObjectStreamStart") then {
-	
+
 		// save superkey
 		profileNamespace setVariable ["SUPERKEY",(_hiveResponse select 2)];
-		
+
 		_hiveLoaded = true;
-	
+
 		diag_log ("HIVE: Commence Object Streaming...");
 		_key = format["CHILD:302:%1:", dayZ_instance];
 		_objectCount = _hiveResponse select 1;
@@ -82,7 +82,7 @@ if (isServer && isNil "sm_done") then {
 		};
 		diag_log ("HIVE: got " + str(_bQty) + " Epoch Objects and " + str(_vQty) + " Vehicles");
 	};
-	
+
 	// # NOW SPAWN OBJECTS #
 	_totalvehicles = 0;
 	{
@@ -95,7 +95,7 @@ if (isServer && isNil "sm_done") then {
 		_hitPoints =	_x select 6;
 		_fuel =			_x select 7;
 		_damage = 		_x select 8;
-		
+
 		_dir = 0;
 		_pos = [0,0,0];
 		_wsDone = false;
@@ -106,19 +106,19 @@ if (isServer && isNil "sm_done") then {
 				_pos = _worldspace select 1;
 				_wsDone = true;
 			}
-		};			
-		
+		};
+
 		if (!_wsDone) then {
 			if (count _worldspace >= 1) then { _dir = _worldspace select 0; };
 			_pos = [getMarkerPos "center",0,4000,10,0,2000,0] call BIS_fnc_findSafePos;
 			if (count _pos < 3) then { _pos = [_pos select 0,_pos select 1,0]; };
 			diag_log ("MOVED OBJ: " + str(_idKey) + " of class " + _type + " to pos: " + str(_pos));
 		};
-		
+
 
 		if (_damage < 1) then {
 			//diag_log format["OBJ: %1 - %2", _idKey,_type];
-			
+
 			//Create it
 			_object = createVehicle [_type, _pos, [], 0, "CAN_COLLIDE"];
 			_object setVariable ["lastUpdate",time];
@@ -154,15 +154,15 @@ if (isServer && isNil "sm_done") then {
 			};
 
 			_object setVariable ["CharacterID", _ownerID, true];
-			
+
 			clearWeaponCargoGlobal  _object;
 			clearMagazineCargoGlobal  _object;
 			// _object setVehicleAmmo DZE_vehicleAmmo;
-			
+
 			_object setdir _dir;
 			_object setposATL _pos;
 			_object setDamage _damage;
-			
+
 			if ((typeOf _object) in dayz_allowedObjects) then {
 				if (DZE_GodModeBase) then {
 					_object addEventHandler ["HandleDamage", {false}];
@@ -173,7 +173,7 @@ if (isServer && isNil "sm_done") then {
 				_object enableSimulation false;
 				// used for inplace upgrades && lock/unlock of safe
 				_object setVariable ["OEMPos", _pos, true];
-				
+
 			};
 
 			if (count _intentory > 0) then {
@@ -187,7 +187,7 @@ if (isServer && isNil "sm_done") then {
 					//Add weapons
 					_objWpnTypes = (_intentory select 0) select 0;
 					_objWpnQty = (_intentory select 0) select 1;
-					_countr = 0;					
+					_countr = 0;
 					{
 						if(_x in (DZE_REPLACE_WEAPONS select 0)) then {
 							_x = (DZE_REPLACE_WEAPONS select 1) select ((DZE_REPLACE_WEAPONS select 0) find _x);
@@ -197,8 +197,8 @@ if (isServer && isNil "sm_done") then {
 							_object addWeaponCargoGlobal [_x,(_objWpnQty select _countr)];
 						};
 						_countr = _countr + 1;
-					} count _objWpnTypes; 
-				
+					} count _objWpnTypes;
+
 					//Add Magazines
 					_objWpnTypes = (_intentory select 1) select 0;
 					_objWpnQty = (_intentory select 1) select 1;
@@ -225,8 +225,8 @@ if (isServer && isNil "sm_done") then {
 						_countr = _countr + 1;
 					} count _objWpnTypes;
 				};
-			};	
-			
+			};
+
 			if (_object isKindOf "AllVehicles") then {
 				{
 					_selection = _x select 0;
@@ -238,14 +238,14 @@ if (isServer && isNil "sm_done") then {
 				_object setFuel _fuel;
 
 				if (!((typeOf _object) in dayz_allowedObjects)) then {
-					
+
 					//_object setvelocity [0,0,1];
-					_object call fnc_veh_ResetEH;		
-					
+					_object call fnc_veh_ResetEH;
+
 					if(_ownerID != "0" && !(_object isKindOf "Bicycle")) then {
 						_object setvehiclelock "locked";
 					};
-					
+
 					_totalvehicles = _totalvehicles + 1;
 
 					// total each vehicle
@@ -274,11 +274,11 @@ if (isServer && isNil "sm_done") then {
 					_data = "HiveEXT" callExtension _key;
 
 					//diag_log "HIVE: Request sent";
-			
+
 					//Process result
 					_result = call compile format ["%1",_data];
 					_status = _result select 0;
-			
+
 					if (_status == "ObjectStreamStart") then {
 						_val = _result select 1;
 						//Stream Objects
@@ -310,7 +310,7 @@ if (isServer && isNil "sm_done") then {
 			diag_log "HIVE: Vehicle Spawn limit reached!";
 		};
 	};
-	
+
 	//  spawn_roadblocks
 	diag_log ("HIVE: Spawning # of Debris: " + str(MaxDynamicDebris));
 	for "_x" from 1 to MaxDynamicDebris do {
@@ -372,14 +372,16 @@ if (isServer && isNil "sm_done") then {
 				// exit since we did not find any further markers
 				_i = spawnMarkerCount + 99;
 			};
-			
+
 		};
 		diag_log format["Total Number of spawn locations %1", actualSpawnMarkerCount];
-		
+
 		endLoadingScreen;
 	};
 
-	allowConnection = true;	
+	[] ExecVM "\z\addons\dayz_server\EMS\DZMSInit.sqf";
+
+	allowConnection = true;
 	sm_done = true;
 	publicVariable "sm_done";
 };
