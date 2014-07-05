@@ -27,7 +27,7 @@ if ( (isnil("DZAI_isActive")) && (isnil("SAR_version")) && (isnil("WAIconfigload
 
 	// They weren't found, so let's set relationships
 	diag_log format ["[DZMS]: Relations not found! Using DZMS Relations."];
-	
+
 	// Create the groups if they aren't created already
 	createCenter east;
 	// Make AI Hostile to Survivors
@@ -36,7 +36,7 @@ if ( (isnil("DZAI_isActive")) && (isnil("SAR_version")) && (isnil("WAIconfigload
 	// Make AI Hostile to Zeds
 	EAST setFriend [CIVILIAN,0];
 	CIVILIAN setFriend [EAST,0];
-	
+
 } else {
 
 	// Let's inform the user which relations we are using
@@ -59,7 +59,7 @@ if ( (isnil("DZAI_isActive")) && (isnil("SAR_version")) && (isnil("WAIconfigload
 		diag_log format ["[DZMS]: If Issues Arise, Decide on a Single AI System! (DayZAI, SargeAI, or WickedAI)"];
 	};
 	DZMSRelations = nil; //Destroy the Global Var
-	
+
 };
 
 // Let's Load the Mission Configuration
@@ -94,6 +94,9 @@ if (DZMSEpoch) then {
 
 // Lets load our functions
 call compile preprocessFileLineNumbers "\z\addons\dayz_server\EMS\DZMSFunctions.sqf";
+
+DZMSMajDone = false;
+DZMSMinDone = false;
 
 // Let's get the clocks running!
 [] ExecVM DZMSMajTimer;
